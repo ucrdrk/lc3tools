@@ -160,7 +160,7 @@ std::pair<double, double> Tester::testAll(void)
         total_points_earned += std::get<0>(points);
         total_points += std::get<1>(points);
     }
-    std::cout << "    ]\n";
+    std::cout << "    ],\n";
 
     std::cout << "    \"leaderboard\": [],\n";
     std::cout << "    \"visibility\": \"visible\",\n";
