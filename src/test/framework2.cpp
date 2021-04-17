@@ -151,19 +151,23 @@ void Tester::registerTest(std::string const & name, test_func_t test_func, doubl
 
 std::pair<double, double> Tester::testAll(void)
 {
+    std::cout << "{\n";
+
+    std::cout << "    \"tests\": [\n";
     double total_points_earned = 0, total_points = 0;
     for(TestCase const & test : tests) {
         auto points = testSingle(test);
         total_points_earned += std::get<0>(points);
         total_points += std::get<1>(points);
     }
+    std::cout << "    ]\n";
 
-    std::cout << "==========\n";
-    std::cout << "==========\n";
+    std::cout << "    \"leaderboard\": [],\n";
+    std::cout << "    \"visibility\": \"visible\",\n";
+    std::cout << "    \"execution_time\": 0,\n";
+    std::cout << "    \"score\": " << total_points_earned << "\n";
 
-    double percent_points_earned = total_points_earned / total_points;
-    std::cout << "Total points earned: " << total_points_earned << "/" << total_points << " ("
-              << (percent_points_earned * 100) << "%)\n";
+    std::cout << "}\n";
 
     return std::make_pair(total_points_earned, total_points);
 }
@@ -190,8 +194,8 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
     this->inputter = &inputter;
     this->simulator = &simulator;
 
-    std::cout << "==========\n";
-    std::cout << "Test: " << test.name;
+    std::cout << "        {\n";
+    std::cout << "            \"name\": \"" << test.name << "\",\n";
 
     if(test.randomize) {
         if(seed == 0) {
@@ -199,9 +203,8 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
         } else {
             simulator.randomizeState(seed);
         }
-        std::cout << " (Randomized Machine, Seed: " << seed << ")";
+        std::cout << "           \"extra_data\": \"Randomized Machine, Seed: " << seed << "\",\n";
     }
-    std::cout << std::endl;
 
     for(std::string const & obj_filename : obj_filenames) {
         if(! simulator.loadObjFile(obj_filename)) {
@@ -228,9 +231,10 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
 
     // In case the verify points don't add up to the total points, clamp
     double points_earned = std::min(test_points_earned, test.points);
-    double percent_points_earned = points_earned / test.points;
-    std::cout << "Test points earned: " << points_earned << "/" << test.points << " ("
-              << (percent_points_earned * 100) << "%)\n";
+    std::cout << "            \"score\": " << points_earned << ",\n"
+              << "            \"max_score\": " << test.points << "\n";
+
+    std::cout << "        },\n";
 
     this->printer = nullptr;
     this->inputter = nullptr;
@@ -241,14 +245,11 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
 
 void Tester::verify(std::string const & label, bool pred, double points)
 {
-    std::cout << "  " << label << " => ";
     if(pred) {
-        std::cout << "Pass (+" << points << " pts)";
         test_points_earned += points;
-    } else {
-        std::cout << "Fail (+0 pts)";
-    }
-    std::cout << std::endl;
+    }  else {
+        std::cout << "            \"output\": \"" << label << "\",\n";
+     }
 }
 
 void Tester::output(std::string const & message)
