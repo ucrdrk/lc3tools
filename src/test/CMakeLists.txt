@@ -8,7 +8,7 @@ add_library(framework OBJECT ${FRAMEWORK_SOURCES})
 
 # get all necessary files
 if(BUILD_SAMPLES)
-    file(GLOB TEST_SOURCES tests/*.cpp tests/samples/*.cpp)
+    file(GLOB TEST_SOURCES tests/*.cpp tests/samples/*.cpp tests/cs061/*.cpp)
 else()
     file(GLOB TEST_SOURCES tests/*.cpp)
 endif()
