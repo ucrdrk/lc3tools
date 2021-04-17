@@ -153,14 +153,18 @@ std::pair<double, double> Tester::testAll(void)
 {
     std::cout << "{\n";
 
-    std::cout << "    \"tests\": [\n";
+    std::cout << "    \"tests\": [";
     double total_points_earned = 0, total_points = 0;
+    bool first = true;
     for(TestCase const & test : tests) {
+        if (!first) std::cout << ",";
+        else first = false;
+        std::cout << "\n";
         auto points = testSingle(test);
         total_points_earned += std::get<0>(points);
         total_points += std::get<1>(points);
     }
-    std::cout << "    ],\n";
+    std::cout << "\n    ],\n";
 
     std::cout << "    \"leaderboard\": [],\n";
     std::cout << "    \"visibility\": \"visible\",\n";
@@ -234,7 +238,7 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
     std::cout << "            \"score\": " << points_earned << ",\n"
               << "            \"max_score\": " << test.points << "\n";
 
-    std::cout << "        },\n";
+    std::cout << "        }";
 
     this->printer = nullptr;
     this->inputter = nullptr;
