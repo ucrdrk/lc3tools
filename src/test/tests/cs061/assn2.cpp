@@ -30,21 +30,17 @@ std::string BuildErrorLabel(const std::string &expected, const std::string &got)
 void ExecuteTest(lc3::sim &sim, Tester &tester, double total_points, int32_t a, int32_t b) {
     bool success = true;
 
-    success &= sim.runUntilInputRequested();
-    tester.verify("User Prompt", success && tester.checkMatch(tester.getOutput(), user_prompt), total_points/5);
-    tester.clearOutput();
     std::ostringstream input;
     input << a << b;
     tester.setInputString(input.str());
-    success &= sim.runUntilInputRequested();
+
+    success &= sim.runUntilHalt();
 
     std::ostringstream output;
-    output << a << "\n" << b << "\n" << a << " - " << b << " = " << (a - b) << "\n";
+    output << user_prompt << a << "\n" << b << "\n" << a << " - " << b << " = " << (a - b) << "\n";
     std::string expected_output = output.str();
     std::string label = BuildErrorLabel(expected_output, tester.getOutput()); 
-    tester.verify(label, success && tester.checkContain(tester.getOutput(), expected_output), 4 * total_points/5);
-    
-    success &= sim.runUntilHalt();
+    tester.verify(label, success && tester.checkContain(tester.getOutput(), expected_output), 4 * total_points/5);    
 }
 
 void TestNegative(lc3::sim &sim, Tester &tester, double total_points) {
