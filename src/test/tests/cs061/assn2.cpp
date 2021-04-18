@@ -48,7 +48,7 @@ void ExecuteTest(lc3::sim &sim, Tester &tester, double total_points, int32_t a, 
     std::string expected_output = output.str();
     std::string label = BuildErrorLabel(expected_output, tester.getOutput()); 
     ReplaceNewLines(label);
-    tester.verify(label, success && tester.checkContain(tester.getOutput(), expected_output), 4 * total_points/5);    
+    tester.verify(label, success && tester.checkContain(tester.getOutput(), expected_output), total_points);    
 }
 
 void TestNegative(lc3::sim &sim, Tester &tester, double total_points) {
