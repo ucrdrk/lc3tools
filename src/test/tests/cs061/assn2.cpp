@@ -5,6 +5,7 @@
 #define  API_VER 2
 #include "framework.h"
 #include <sstream>
+#include <algorithm>
 
 void testBringup(lc3::sim &sim) {
     sim.writePC(0x3000);
@@ -27,6 +28,12 @@ std::string BuildErrorLabel(const std::string &expected, const std::string &got)
     return  error_prefix + got + error_conjunction + expected;
 }
 
+void ReplaceNewLines(std::string &str) {
+    for(std::string::size_type pos = str.find("\n"); pos != std::string::npos; pos = str.find("\n")) {
+        str.replace(pos, 1, "\\n");
+    }
+}
+
 void ExecuteTest(lc3::sim &sim, Tester &tester, double total_points, int32_t a, int32_t b) {
     bool success = true;
 
@@ -40,6 +47,7 @@ void ExecuteTest(lc3::sim &sim, Tester &tester, double total_points, int32_t a, 
     output << user_prompt << a << "\n" << b << "\n" << a << " - " << b << " = " << (a - b) << "\n";
     std::string expected_output = output.str();
     std::string label = BuildErrorLabel(expected_output, tester.getOutput()); 
+    ReplaceNewLines(label);
     tester.verify(label, success && tester.checkContain(tester.getOutput(), expected_output), 4 * total_points/5);    
 }
 
