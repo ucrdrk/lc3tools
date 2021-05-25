@@ -34,48 +34,47 @@ void ReplaceNewLines(std::string &str) {
     }
 }
 
-void ExecuteTest(lc3::sim &sim, Tester &tester, double total_points, int32_t a, int32_t b) {
+void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points, int32_t a, int32_t b) {
     bool success = true;
 
     std::ostringstream input;
     input << a << b;
     tester.setInputString(input.str());
+    tester.setSolutionInputString(input.str());
 
     success &= sim.runUntilHalt();
+    success &= sol_sim.runUntilHalt();
 
-    std::ostringstream output;
-    output << user_prompt << a << "\n" << b << "\n" << a << " - " << b << " = " << (a - b) << "\n";
-    std::string expected_output = output.str();
-    std::string label = BuildErrorLabel(expected_output, tester.getOutput()); 
+    std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
     ReplaceNewLines(label);
-    tester.verify(label, success && tester.checkContain(tester.getOutput(), expected_output), total_points);    
+    tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
 }
 
-void TestNegative(lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sim, tester, total_points, 2, 9);
+void TestNegative(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
+    ExecuteTest(sol_sim, sim, tester, total_points, 2, 9);
 }
 
-void TestPositive(lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sim, tester, total_points, 8, 4);
+void TestPositive(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
+    ExecuteTest(sol_sim, sim, tester, total_points, 8, 4);
 }
 
-void TestZeroResult(lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sim, tester, total_points, 6, 6);
+void TestZeroResult(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
+    ExecuteTest(sol_sim, sim, tester, total_points, 6, 6);
 }
 
-void TestZeroInput(lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sim, tester, total_points, 0, 0);
+void TestZeroInput(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
+    ExecuteTest(sol_sim, sim, tester, total_points, 0, 0);
 }
 
-void TestSubtractZero(lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sim, tester, total_points, 3, 0);
+void TestSubtractZero(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
+    ExecuteTest(sol_sim, sim, tester, total_points, 3, 0);
 }
 
 void setup(Tester &tester) {
-    tester.registerTest("TestNegative", TestNegative, 25, false);
-    tester.registerTest("TestPositive", TestPositive, 25, false);
-    tester.registerTest("TestZero", TestZeroResult, 15, false);
-    tester.registerTest("TestZero", TestZeroInput, 15, false);
-    tester.registerTest("TestZero", TestSubtractZero, 20, false);
+    tester.registerCompTest("TestNegative", TestNegative, 25, false);
+    tester.registerCompTest("TestPositive", TestPositive, 25, false);
+    tester.registerCompTest("TestZero", TestZeroResult, 15, false);
+    tester.registerCompTest("TestZero", TestZeroInput, 15, false);
+    tester.registerCompTest("TestZero", TestSubtractZero, 20, false);
 }
 

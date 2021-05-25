@@ -21,6 +21,7 @@ struct CLIArgs
     bool tester_verbose = false;
     uint64_t seed = 0;
     std::vector<std::string> test_filter;
+    std::string solution;
 };
 
 std::vector<TestCase> tests;
@@ -29,6 +30,30 @@ std::function<void(Tester &)> setup = nullptr;
 std::function<void(void)> shutdown = nullptr;
 std::function<void(lc3::sim &)> testBringup = nullptr;
 std::function<void(lc3::sim &)> testTeardown = nullptr;
+
+lc3::optional<std::string> assemble_obj_file(std::string const & filename, lc3::core::SymbolTable & symbol_table, CLIArgs & args) {
+    lc3::ConsolePrinter asm_printer;
+    lc3::as assembler(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0, false);
+    lc3::conv converter(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0);
+
+    lc3::optional<std::string> result;
+    if(! endsWith(filename, ".obj")) {
+        if(endsWith(filename, ".bin")) {
+            result = converter.convertBin(filename);
+        } else {
+            lc3::optional<std::pair<std::string, lc3::core::SymbolTable>> asm_result;
+            asm_result = assembler.assemble(filename);
+            if(asm_result) {
+                symbol_table.insert(asm_result->second.begin(), asm_result->second.end());
+                result = asm_result->first;
+            }
+        }
+    } else {
+        result = filename;
+    }
+
+    return result;
+}
 
 int main(int argc, char * argv[])
 {
@@ -59,6 +84,8 @@ int main(int argc, char * argv[])
             args.seed = std::stoull(std::get<1>(arg));
         } else if(std::get<0>(arg) == "test-filter") {
             args.test_filter.push_back(std::get<1>(arg));
+        } else if(std::get<0>(arg) == "solution") {
+            args.solution = std::get<1>(arg);
         } else if(std::get<0>(arg) == "h" || std::get<0>(arg) == "help") {
             std::cout << "usage: " << argv[0] << " [OPTIONS] FILE [FILE...]\n";
             std::cout << "\n";
@@ -70,6 +97,7 @@ int main(int argc, char * argv[])
             std::cout << "  --tester-verbose       Output tester messages\n";
             std::cout << "  --seed=N               Optional seed for randomization\n";
             std::cout << "  --test-filter=TEST     Only run TEST (can be repeated)\n";
+            std::cout << "  --solution=SOLUTION    Solution program for comp tests\n";
             return 0;
         }
     }
@@ -78,27 +106,15 @@ int main(int argc, char * argv[])
     lc3::as assembler(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0, false);
     lc3::conv converter(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0);
     lc3::core::SymbolTable symbol_table;
+    lc3::core::SymbolTable solution_symbol_table;
 
     std::vector<std::string> obj_filenames;
+    std::string solution_obj_filename;
     bool valid_program = true;
     for(int i = 1; i < argc; i += 1) {
         std::string filename(argv[i]);
         if(filename[0] != '-') {
-            lc3::optional<std::string> result;
-            if(! endsWith(filename, ".obj")) {
-                if(endsWith(filename, ".bin")) {
-                    result = converter.convertBin(filename);
-                } else {
-                    lc3::optional<std::pair<std::string, lc3::core::SymbolTable>> asm_result;
-                    asm_result = assembler.assemble(filename);
-                    if(asm_result) {
-                        symbol_table.insert(asm_result->second.begin(), asm_result->second.end());
-                        result = asm_result->first;
-                    }
-                }
-            } else {
-                result = filename;
-            }
+            lc3::optional<std::string> result = assemble_obj_file(filename, symbol_table, args);
 
             if(result) {
                 obj_filenames.push_back(*result);
@@ -108,14 +124,25 @@ int main(int argc, char * argv[])
         }
     }
 
+    if (args.solution.size() > 0) {
+        auto result = assemble_obj_file(args.solution, solution_symbol_table, args);
+
+        if (result) {
+            solution_obj_filename = *result;
+        } else {
+            valid_program = false;
+        }
+    }
+
     if(obj_filenames.size() == 0) {
         return 1;
     }
 
     if(valid_program) {
         Tester tester(args.print_output, args.sim_print_level_override ? args.sim_print_level : 1,
-            args.ignore_privilege, args.tester_verbose, args.seed, obj_filenames);
+            args.ignore_privilege, args.tester_verbose, args.seed, obj_filenames, solution_obj_filename);
         tester.setSymbolTable(symbol_table);
+        tester.setSolutionSymbolTable(solution_symbol_table);
         setup(tester);
 
         if(args.test_filter.size() == 0) {
@@ -136,10 +163,14 @@ TestCase::TestCase(std::string const & name, test_func_t test_func, double point
     : name(name), test_func(test_func), points(points), randomize(randomize)
 {}
 
+CompTestCase::CompTestCase(std::string const & name, comp_test_func_t comp_test_func, double points, bool randomize)
+    : name(name), comp_test_func(comp_test_func), points(points), randomize(randomize)
+{}
+
 Tester::Tester(bool print_output, uint32_t print_level, bool ignore_privilege, bool verbose,
-    uint64_t seed, std::vector<std::string> const & obj_filenames)
+    uint64_t seed, std::vector<std::string> const & obj_filenames, std::string const & solution_obj_filename)
     : print_output(print_output), ignore_privilege(ignore_privilege), verbose(verbose),
-      print_level(print_level), seed(seed), obj_filenames(obj_filenames)
+      print_level(print_level), seed(seed), obj_filenames(obj_filenames), solution_obj_filename(solution_obj_filename)
 {
     resetTestPoints();
 }
@@ -149,6 +180,12 @@ void Tester::registerTest(std::string const & name, test_func_t test_func, doubl
     tests.emplace_back(name, test_func, points, randomize);
 }
 
+void Tester::registerCompTest(std::string const & name, comp_test_func_t comp_test_func, double points, bool randomize)
+{
+    comp_tests.emplace_back(name, comp_test_func, points, randomize);
+}
+
+
 std::pair<double, double> Tester::testAll(void)
 {
     std::cout << "{\n";
@@ -156,7 +193,16 @@ std::pair<double, double> Tester::testAll(void)
     std::cout << "    \"tests\": [";
     double total_points_earned = 0, total_points = 0;
     bool first = true;
-    for(TestCase const & test : tests) {
+    // for(TestCase const & test : tests) {
+    //     if (!first) std::cout << ",";
+    //     else first = false;
+    //     std::cout << "\n";
+    //     auto points = testSingle(test);
+    //     total_points_earned += std::get<0>(points);
+    //     total_points += std::get<1>(points);
+    // }
+
+    for(CompTestCase const & test : comp_tests) {
         if (!first) std::cout << ",";
         else first = false;
         std::cout << "\n";
@@ -164,6 +210,7 @@ std::pair<double, double> Tester::testAll(void)
         total_points_earned += std::get<0>(points);
         total_points += std::get<1>(points);
     }
+
     std::cout << "\n    ],\n";
 
     std::cout << "    \"leaderboard\": [],\n";
@@ -187,16 +234,26 @@ std::pair<double, double> Tester::testSingle(std::string const & test_name)
     return std::make_pair(0, 0);
 }
 
-std::pair<double, double> Tester::testSingle(TestCase const & test)
+std::pair<double, double> Tester::testSingle(TestCase const & test) {
+    return std::make_pair(0, 0);
+}
+
+std::pair<double, double> Tester::testSingle(CompTestCase const & test)
 {
     resetTestPoints();
 
     BufferedPrinter printer(print_output);
+    BufferedPrinter solution_printer(print_output);
     StringInputter inputter;
+    StringInputter solution_inputter;
     lc3::sim simulator(printer, inputter, print_level);
+    lc3::sim solution_simulator(solution_printer, solution_inputter, print_level);
     this->printer = &printer;
+    this->solution_printer = &solution_printer;
     this->inputter = &inputter;
+    this->solution_inputter = &solution_inputter;
     this->simulator = &simulator;
+    this->solution_simulator = &solution_simulator;
 
     std::cout << "        {\n";
     std::cout << "            \"name\": \"" << test.name << "\",\n";
@@ -217,14 +274,21 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
         }
     }
 
+    if(! solution_simulator.loadObjFile(solution_obj_filename)) {
+        std::cout << "Could not init solution simulator\n";
+        return std::make_pair(0, test.points);
+    }
+
     testBringup(simulator);
+    testBringup(solution_simulator);
 
     if(ignore_privilege) {
         simulator.setIgnorePrivilege(true);
+        solution_simulator.setIgnorePrivilege(true);
     }
 
     try {
-        test.test_func(simulator, *this, test.points);
+        test.comp_test_func(solution_simulator, simulator, *this, test.points);
     } catch(lc3::utils::exception const & e) {
         error("c++ exception", std::string(e.what()));
         std::cout << "Test case ran into exception: " << e.what() << "\n";
@@ -232,6 +296,7 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
     }
 
     testTeardown(simulator);
+    testTeardown(solution_simulator);
 
     // In case the verify points don't add up to the total points, clamp
     double points_earned = std::min(test_points_earned, test.points);
@@ -243,6 +308,9 @@ std::pair<double, double> Tester::testSingle(TestCase const & test)
     this->printer = nullptr;
     this->inputter = nullptr;
     this->simulator = nullptr;
+    this->solution_printer = nullptr;
+    this->solution_inputter = nullptr;
+    this->solution_simulator = nullptr;
 
     return std::make_pair(points_earned, test.points);
 }
@@ -276,6 +344,12 @@ void Tester::resetTestPoints(void)
 std::string Tester::getOutput(void) const
 {
     auto const & buffer = printer->getBuffer();
+    return std::string{buffer.begin(), buffer.end()};
+}
+
+std::string Tester::getSolutionOutput(void) const
+{
+    auto const & buffer = solution_printer->getBuffer();
     return std::string{buffer.begin(), buffer.end()};
 }
 
