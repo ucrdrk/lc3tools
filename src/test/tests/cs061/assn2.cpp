@@ -21,7 +21,7 @@ void shutdown() {
 }
 
 static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\n";
-static const std::string error_conjunction = ", should be: \\n";
+static const std::string error_conjunction = "\\nshould be: \\n";
 
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
     return  error_prefix + got + error_conjunction + expected;
