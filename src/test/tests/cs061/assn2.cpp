@@ -30,7 +30,7 @@ std::string BuildErrorLabel(const std::string &expected, const std::string &got)
 
 void ReplaceNewLines(std::string &str) {
     for(std::string::size_type pos = str.find("\n"); pos != std::string::npos; pos = str.find("\n")) {
-        str.replace(pos, 1, "\\n");
+        str.replace(pos, 1, "\\\\n");
     }
 }
 
