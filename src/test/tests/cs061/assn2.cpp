@@ -20,8 +20,8 @@ void shutdown() {
 
 }
 
-static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \n";
-static const std::string error_conjunction = ", should be: \n";
+static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\n";
+static const std::string error_conjunction = ", should be: \\n";
 
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
     return  error_prefix + got + error_conjunction + expected;
@@ -44,8 +44,12 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     success &= sim.runUntilHalt();
     success &= sol_sim.runUntilHalt();
 
-    std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
-    ReplaceNewLines(label);
+    std::string solution = tester.getSolutionOutput();
+    ReplaceNewLines(solution);
+    std::string output = tester.getOutput();
+    ReplaceNewLines(output);
+
+    std::string label = BuildErrorLabel(solution, output); 
     tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
 }
 
