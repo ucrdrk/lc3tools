@@ -20,9 +20,8 @@ void shutdown() {
 
 }
 
-static const std::string user_prompt = "ENTER two numbers (i.e '0'....'9')\n";
-static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: ";
-static const std::string error_conjunction = ", should be: ";
+static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \n";
+static const std::string error_conjunction = ", should be: \n";
 
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
     return  error_prefix + got + error_conjunction + expected;
