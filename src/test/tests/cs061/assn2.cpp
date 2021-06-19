@@ -6,6 +6,7 @@
 #include "framework.h"
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 void testBringup(lc3::sim &sim) {
     sim.writePC(0x3000);
@@ -27,10 +28,9 @@ std::string BuildErrorLabel(const std::string &expected, const std::string &got)
     return  error_prefix + got + error_conjunction + expected;
 }
 
-void ReplaceNewLines(std::string &str) {
-    for(std::string::size_type pos = str.find("\n"); pos != std::string::npos; pos = str.find("\n")) {
-        str.replace(pos, 1, "\\\\n");
-    }
+std::string ReplaceNewLines(std::string const &str) {
+    std::regex nle("\\n");
+    return std::regex_replace(str, nle, "\\\\n");
 }
 
 void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points, int32_t a, int32_t b) {
@@ -44,10 +44,8 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     success &= sim.runUntilHalt();
     success &= sol_sim.runUntilHalt();
 
-    std::string solution = tester.getSolutionOutput();
-    ReplaceNewLines(solution);
-    std::string output = tester.getOutput();
-    ReplaceNewLines(output);
+    std::string solution = ReplaceNewLines(tester.getSolutionOutput());
+    std::string output = ReplaceNewLines(tester.getOutput());
 
     std::string label = BuildErrorLabel(solution, output); 
     tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
