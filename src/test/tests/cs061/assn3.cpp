@@ -49,23 +49,23 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
 }
 
 void Test01(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, 0xcb01, 0xffff);
+    ExecuteTest(sol_sim, sim, tester, total_points, 0xca01, 0xffff);
 }
 
 void Test02(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, 0xcb01, 0xaf19);
+    ExecuteTest(sol_sim, sim, tester, total_points, 0xca01, 0xaf19);
 }
 
 void Test03(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, 0xcb01, 0x8000);
+    ExecuteTest(sol_sim, sim, tester, total_points, 0xca01, 0x8000);
 }
 
 void Test04(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, 0xcb01, 0x0100);
+    ExecuteTest(sol_sim, sim, tester, total_points, 0xca01, 0x0100);
 }
 
 void Test05(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, 0xcb01, 0x0000);
+    ExecuteTest(sol_sim, sim, tester, total_points, 0xca01, 0x0000);
 }
 
 void setup(Tester &tester) {
