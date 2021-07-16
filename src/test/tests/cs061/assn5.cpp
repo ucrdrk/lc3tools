@@ -25,19 +25,19 @@ static const std::string error_prefix = "Failed: Program I/O differs from expect
 static const std::string error_conjunction = "\\\", should be: \n\\\"";
 
 bool not_printable(char c) {
-    return !isprint(c);
-}
-
-std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
-    std::string cleaned_got = got;
-    cleaned_got.erase(std::remove_if(cleaned_got.begin(), cleaned_got.end(), not_printable), cleaned_got.end());
-    return  error_prefix + cleaned_got + error_conjunction + expected + "\\\"";
+    return !isprint(c) && !isspace(c);
 }
 
 void ReplaceNewLines(std::string &str) {
     for(std::string::size_type pos = str.find("\n"); pos != std::string::npos; pos = str.find("\n")) {
         str.replace(pos, 1, "\\n");
     }
+}
+
+std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
+    std::string cleaned_got = got;
+    std::replace_if(cleaned_got.begin(), cleaned_got.end(), not_printable, '_');
+    return  error_prefix + cleaned_got + error_conjunction + expected + "\\\"";
 }
 
 void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points, std::string input, uint16_t addr, uint16_t val) {
