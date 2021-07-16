@@ -24,8 +24,14 @@ static const std::string user_prompt = "ENTER two numbers (i.e '0'....'9')\n";
 static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\\"";
 static const std::string error_conjunction = "\\\", should be: \n\\\"";
 
+bool not_printable(char c) {
+    return !isprint(c);
+}
+
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
-    return  error_prefix + got + error_conjunction + expected + "\\\"";
+    std::string cleaned_got = got;
+    cleaned_got.erase(std::remove_if(cleaned_got.begin(), cleaned_got.end(), not_printable), cleaned_got.end());
+    return  error_prefix + cleaned_got + error_conjunction + expected + "\\\"";
 }
 
 void ReplaceNewLines(std::string &str) {
