@@ -21,11 +21,11 @@ void shutdown() {
 }
 
 static const std::string user_prompt = "ENTER two numbers (i.e '0'....'9')\n";
-static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: ";
-static const std::string error_conjunction = ", should be: ";
+static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\\"";
+static const std::string error_conjunction = "\\\", should be: \n\\\"";
 
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
-    return  error_prefix + got + error_conjunction + expected;
+    return  error_prefix + got + error_conjunction + expected + "\\\"";
 }
 
 void ReplaceNewLines(std::string &str) {
@@ -43,7 +43,9 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     sim.writeMem(addr, val);
     sol_sim.writeMem(addr, val);
 
+    sim.setRunInstLimit(50000);    
     success &= sim.runUntilHalt();
+    sol_sim.setRunInstLimit(50000);
     success &= sol_sim.runUntilHalt();
 
     std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
