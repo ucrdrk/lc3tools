@@ -21,8 +21,8 @@ namespace lc3
     public:
         optional(void) : valid(false) {}
 
-        optional(T const & value) : valid(true), value(value) {}
-        optional(T && other) : valid(true) { std::swap(value, other); }
+        optional(T const & value, bool valid=true) : valid(valid), value(value) {}
+        optional(T && other, bool valid=true) : valid(valid) { std::swap(value, other); }
 
         optional(optional const & other) = default;
         optional(optional && other) = default;

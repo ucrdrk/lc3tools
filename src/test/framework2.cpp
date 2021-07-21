@@ -32,7 +32,7 @@ std::function<void(lc3::sim &)> testBringup = nullptr;
 std::function<void(lc3::sim &)> testTeardown = nullptr;
 
 lc3::optional<std::string> assemble_obj_file(std::string const & filename, lc3::core::SymbolTable & symbol_table, CLIArgs & args) {
-    lc3::ConsolePrinter asm_printer;
+    BufferedPrinter asm_printer(false);
     lc3::as assembler(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0, false);
     lc3::conv converter(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0);
 
@@ -46,6 +46,9 @@ lc3::optional<std::string> assemble_obj_file(std::string const & filename, lc3::
             if(asm_result) {
                 symbol_table.insert(asm_result->second.begin(), asm_result->second.end());
                 result = asm_result->first;
+            } else {
+                auto const & buffer = asm_printer.getBuffer();
+                result = lc3::optional<std::string>(std::string{buffer.begin(), buffer.end()}, false);
             }
         }
     } else {
@@ -53,6 +56,15 @@ lc3::optional<std::string> assemble_obj_file(std::string const & filename, lc3::
     }
 
     return result;
+}
+
+std::string ReplaceNewLines(const std::string &str) {
+    std::string replaced_str(str);
+    for(std::string::size_type pos = replaced_str.find("\n"); pos != std::string::npos; pos = replaced_str.find("\n")) {
+        replaced_str.replace(pos, 1, "\\n");
+    }
+
+    return replaced_str;
 }
 
 int main(int argc, char * argv[])
@@ -102,16 +114,13 @@ int main(int argc, char * argv[])
         }
     }
 
-    lc3::ConsolePrinter asm_printer;
-    lc3::as assembler(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0, false);
-    lc3::conv converter(asm_printer, args.asm_print_level_override ? args.asm_print_level : 0);
     lc3::core::SymbolTable symbol_table;
     lc3::core::SymbolTable solution_symbol_table;
 
     std::vector<std::string> obj_filenames;
     std::string solution_obj_filename;
     bool valid_program = true;
-    for(int i = 1; i < argc; i += 1) {
+    for(int i = 1; i < argc && valid_program; i++) {
         std::string filename(argv[i]);
         if(filename[0] != '-') {
             lc3::optional<std::string> result = assemble_obj_file(filename, symbol_table, args);
@@ -120,11 +129,12 @@ int main(int argc, char * argv[])
                 obj_filenames.push_back(*result);
             } else {
                 valid_program = false;
+                std::cout << "{\"score\": 0, tests: [{\"score\": 0, \"output\":\""<< ReplaceNewLines(*result) << "\"}]}" << std::endl;
             }
         }
     }
 
-    if (args.solution.size() > 0) {
+    if (valid_program && args.solution.size() > 0) {
         auto result = assemble_obj_file(args.solution, solution_symbol_table, args);
 
         if (result) {
