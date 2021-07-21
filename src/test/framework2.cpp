@@ -129,7 +129,7 @@ int main(int argc, char * argv[])
                 obj_filenames.push_back(*result);
             } else {
                 valid_program = false;
-                std::cout << "{\"score\": 0, tests: [{\"score\": 0, \"output\":\""<< ReplaceNewLines(*result) << "\"}]}" << std::endl;
+                std::cout << "{\"score\": 0, \"tests\": [{\"score\": 0, \"output\":\""<< ReplaceNewLines(*result) << "\"}]}" << std::endl;
             }
         }
     }
