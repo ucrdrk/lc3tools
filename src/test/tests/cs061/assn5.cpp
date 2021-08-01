@@ -21,7 +21,7 @@ void shutdown() {
 }
 
 static const std::string user_prompt = "ENTER two numbers (i.e '0'....'9')\n";
-static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\\"\\n";
+static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\n\\\"";
 static const std::string error_conjunction = "\\\", should be: \\n\\\"";
 
 bool not_printable(char c) {
