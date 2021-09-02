@@ -50,9 +50,6 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     sol_sim.setRunInstLimit(50000);
     success &= sol_sim.runUntilHalt();
 
-    std::cout << "solution: " << tester.getSolutionOutput() << std::endl;
-    std::cout << "submission: " << tester.getOutput() << std::endl;
-    
     std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
     ReplaceNewLines(label);
     tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
