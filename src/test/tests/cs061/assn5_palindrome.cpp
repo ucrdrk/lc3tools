@@ -50,49 +50,52 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     sol_sim.setRunInstLimit(50000);
     success &= sol_sim.runUntilHalt();
 
+    std::cout << "solution: " << tester.getSolutionOutput() << std::endl;
+    std::cout << "submission: " << tester.getOutput() << std::endl;
+    
     std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
     ReplaceNewLines(label);
     tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
 }
 
 void Test01(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "");
+    ExecuteTest(sol_sim, sim, tester, total_points, "\n");
 }
 
 void Test02(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "a");
+    ExecuteTest(sol_sim, sim, tester, total_points, "a\n");
 }
 
 void Test03(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "abbaabba");
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbaabba\n");
 }
 
 void Test04(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "abbabba");
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbabba\n");
 }
 
 void Test05(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "abbacdabba");
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbacdabba\n");
 }
 
 void Test06(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "abbaaba");
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbaaba\n");
 }
 
 void Test07(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "a man a plan a canal panama");
+    ExecuteTest(sol_sim, sim, tester, total_points, "a man a plan a canal panama\n");
 }
 
 void Test08(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "amanaplanacanalpanama");
+    ExecuteTest(sol_sim, sim, tester, total_points, "amanaplanacanalpanama\n");
 }
 
 void Test09(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "0123456789012345678901234567890123456789012345678908765432109876543210987654321098765432109876543210");
+    ExecuteTest(sol_sim, sim, tester, total_points, "0123456789012345678901234567890123456789012345678908765432109876543210987654321098765432109876543210\n");
 }
 
 void Test10(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "0123456789012345678901234567890123456789012345678998765432109876543210987654321098765432109876543210");
+    ExecuteTest(sol_sim, sim, tester, total_points, "0123456789012345678901234567890123456789012345678998765432109876543210987654321098765432109876543210\n");
 }
 
 void setup(Tester &tester) {
