@@ -39,7 +39,9 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     sim.writeMem(address, value);
     sol_sim.writeMem(address, value);
 
+    sim.setRunInstLimit(50000);    
     success &= sim.runUntilHalt();
+    sol_sim.setRunInstLimit(50000);    
     success &= sol_sim.runUntilHalt();
 
     std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
