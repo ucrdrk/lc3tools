@@ -144,32 +144,72 @@ bool lc3::core::asmbl::Tokenizer::convertStringToNum(std::string const & str, in
 {
     char const * c_str = str.c_str();
     if(enable_liberal_asm) {
-        if(c_str[0] == '0' && c_str[1] != '\0') { c_str += 1; }
+        if(c_str[0] == '0' && 
+           (c_str[1] == 'B' || c_str[1] == 'b' ||
+            c_str[1] == 'X' || c_str[1] == 'x'))
+        {
+            c_str += 1;
+        }
     }
 
     try {
-        if(c_str[0] == 'B' || c_str[0] == 'b' || c_str[0] == 'X' || c_str[0] == 'x' || c_str[0] == '#') {
-            std::string conv = std::string(c_str + 1);
-            // For some reason, std::stoi will ignore part anything after the conversion.  For example, 1@ gets parsed
-            // to 1.  Leave it be for now.
-            switch(c_str[0]) {
-                case 'B':
-                case 'b': val = std::stoi(conv, nullptr, 2) ; break;
-                case 'X':
-                case 'x': val = std::stoi(conv, nullptr, 16); break;
-                case '#': val = std::stoi(conv)             ; break;
-                default : val = std::stoi(c_str)            ; break;
+        uint32_t base;
+        switch(c_str[0]) {
+            case 'B':
+            case 'b': c_str += 1; base = 2;  break;
+            case 'X':
+            case 'x': c_str += 1; base = 16; break;
+            case '#': c_str += 1; base = 10; break;
+            default: base = 10; break;
+        }
+
+        bool negative = false;
+        if(c_str[0] == '-') {
+            c_str += 1;
+            negative = true;
+        }
+
+        std::string conv{c_str};
+        if(isValidNumString(conv, base)) {
+            val = std::stoi(conv, nullptr, base);
+            if(negative) {
+                val *= -1;
             }
             return true;
-        } else {
-            val = std::stoi(c_str);
-            return true;
         }
+
         return false;
     } catch(std::invalid_argument const & e) {
         (void) e;
         return false;
+    } catch(std::out_of_range const & e) {
+        (void) e;
+        return false;
     }
+}
+
+bool lc3::core::asmbl::Tokenizer::isValidNumString(std::string const & str, uint32_t base) const
+{
+    if(base == 16) {
+        for(char c : str) {
+            if(! std::isxdigit(c)) {
+                return false;
+            }
+        }
+    } else if(base == 10) {
+        for(char c : str) {
+            if(! std::isdigit(c)) {
+                return false;
+            }
+        }
+    } else if(base == 2) {
+        for(char c : str) {
+            if(c != '0' && c != '1') {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 bool lc3::core::asmbl::Tokenizer::isDone(void) const
