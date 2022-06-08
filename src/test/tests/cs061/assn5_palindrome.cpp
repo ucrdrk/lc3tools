@@ -33,6 +33,12 @@ void ReplaceNewLines(std::string &str) {
     }
 }
 
+void ReplaceUnprintables(std::string &str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) -> unsigned char {
+        return isprint(ch) ? ch : '?';
+    });
+}
+
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
     std::string cleaned_got = got;
     std::replace_if(cleaned_got.begin(), cleaned_got.end(), not_printable, '_');
@@ -52,6 +58,7 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
 
     std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
     ReplaceNewLines(label);
+    ReplaceUnprintables(label);
     tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
 }
 
