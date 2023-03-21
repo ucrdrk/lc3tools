@@ -20,7 +20,6 @@ void shutdown() {
 
 }
 
-static const std::string user_prompt = "ENTER two numbers (i.e '0'....'9')\n";
 static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\n\\\"";
 static const std::string error_conjunction = "\\\", should be: \\n\\\"";
 
@@ -34,20 +33,23 @@ void ReplaceNewLines(std::string &str) {
     }
 }
 
+void ReplaceUnprintables(std::string &str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) -> unsigned char {
+        return isprint(ch) ? ch : '?';
+    });
+}
+
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
     std::string cleaned_got = got;
     std::replace_if(cleaned_got.begin(), cleaned_got.end(), not_printable, '_');
     return  error_prefix + cleaned_got + error_conjunction + expected + "\\\"";
 }
 
-void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points, std::string input, uint16_t addr, uint16_t val) {
+void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points, std::string input) {
     bool success = true;
 
     tester.setInputString(input);
     tester.setSolutionInputString(input);
-
-    sim.writeMem(addr, val);
-    sol_sim.writeMem(addr, val);
 
     sim.setRunInstLimit(50000);    
     success &= sim.runUntilHalt();
@@ -56,159 +58,60 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
 
     std::string label = BuildErrorLabel(tester.getSolutionOutput(), tester.getOutput()); 
     ReplaceNewLines(label);
+    ReplaceUnprintables(label);
     tester.verify(label, success && tester.checkContain(tester.getOutput(), tester.getSolutionOutput()), total_points);    
 }
 
 void Test01(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "x7", 0xB600, 0x0000);
+    ExecuteTest(sol_sim, sim, tester, total_points, "\n");
 }
 
 void Test02(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "17", 0xB600, 0x0000);
+    ExecuteTest(sol_sim, sim, tester, total_points, "a\n");
 }
 
 void Test03(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "17", 0xB600, 0x8000);
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbaabba\n");
 }
 
 void Test04(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "17", 0xB600, 0xabcd);
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbabba\n");
 }
 
 void Test05(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "17", 0xB600, 0xffff);
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbacdabba\n");
 }
 
 void Test06(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "27", 0xB600, 0x0000);
+    ExecuteTest(sol_sim, sim, tester, total_points, "abbaaba\n");
 }
 
 void Test07(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "27", 0xB600, 0x8000);
+    ExecuteTest(sol_sim, sim, tester, total_points, "a man a plan a canal panama\n");
 }
 
 void Test08(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "27", 0xB600, 0xabcd);
+    ExecuteTest(sol_sim, sim, tester, total_points, "amanaplanacanalpanama\n");
 }
 
 void Test09(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "27", 0xB600, 0xffff);
+    ExecuteTest(sol_sim, sim, tester, total_points, "0123456789012345678901234567890123456789012345678908765432109876543210987654321098765432109876543210\n");
 }
 
 void Test10(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "37", 0xB600, 0x0000);
-}
-
-void Test11(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "37", 0xB600, 0x8000);
-}
-
-void Test12(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "37", 0xB600, 0xabcd);
-}
-
-void Test13(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "37", 0xB600, 0xffff);
-}
-
-void Test14(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "47", 0xB600, 0x0000);
-}
-
-void Test15(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "47", 0xB600, 0x8000);
-}
-
-void Test16(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "47", 0xB600, 0xabcd);
-}
-
-void Test17(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "47", 0xB600, 0xffff);
-}
-
-void Test18(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "58\n7", 0xB600, 0x0000);
-}
-
-void Test19(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "517\n12\n7", 0xB600, 0x0000);
-}
-
-void Test20(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "5-6\n7", 0xB600, 0x0000);
-}
-
-void Test21(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "5g3\n7", 0xB600, 0x0000);
-}
-
-void Test22(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "5\n5\n7", 0xB600, 0x0000);
-}
-
-void Test23(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "515\n7", 0xB600, 0x8000);
-}
-
-void Test24(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "51\n7", 0xB600, 0xabcd);
-}
-
-void Test25(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "51\n7", 0xB600, 0xffff);
-}
-
-void Test26(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "67", 0xB600, 0x0000);
-}
-
-void Test27(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "67", 0xB600, 0x8000);
-}
-
-void Test28(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "67", 0xB600, 0xabcd);
-}
-
-void Test29(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "67", 0xB600, 0xffff);
-}
-
-void Test30(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_points) {
-    ExecuteTest(sol_sim, sim, tester, total_points, "7", 0xB600, 0x0000);
+    ExecuteTest(sol_sim, sim, tester, total_points, "0123456789012345678901234567890123456789012345678998765432109876543210987654321098765432109876543210\n");
 }
 
 void setup(Tester &tester) {
-    tester.registerCompTest("Test Menu Error", Test01, 4, false);
-    tester.registerCompTest("Test Option 1 with x0000", Test02, 3, false);
-    tester.registerCompTest("Test Option 1 with x8000", Test03, 3, false);
-    tester.registerCompTest("Test Option 1 with xABCD", Test04, 3, false);
-    tester.registerCompTest("Test Option 1 with xFFFF", Test05, 3, false);
-    tester.registerCompTest("Test Option 2 with x0000", Test06, 3, false);
-    tester.registerCompTest("Test Option 2 with x8000", Test07, 3, false);
-    tester.registerCompTest("Test Option 2 with xABCD", Test08, 3, false);
-    tester.registerCompTest("Test Option 2 with xFFFF", Test09, 3, false);
-    tester.registerCompTest("Test Option 3 with x0000", Test10, 4, false);
-    tester.registerCompTest("Test Option 3 with x8000", Test11, 4, false);
-    tester.registerCompTest("Test Option 3 with xABCD", Test12, 4, false);
-    tester.registerCompTest("Test Option 3 with xFFFF", Test13, 4, false);
-    tester.registerCompTest("Test Option 4 with x0000", Test14, 4, false);
-    tester.registerCompTest("Test Option 4 with x8000", Test15, 4, false);
-    tester.registerCompTest("Test Option 4 with xABCD", Test16, 4, false);
-    tester.registerCompTest("Test Option 4 with xFFFF", Test17, 4, false);
-    tester.registerCompTest("Test Option 5 with 8, x0000", Test18, 3, false);
-    tester.registerCompTest("Test Option 5 Error Case #1 with x0000", Test19, 3, false);
-    tester.registerCompTest("Test Option 5 Error Case #2 with x0000", Test20, 3, false);
-    tester.registerCompTest("Test Option 5 Error Case #3 with x0000", Test21, 3, false);
-    tester.registerCompTest("Test Option 5 Error Case #4 with x0000", Test22, 3, false);
-    tester.registerCompTest("Test Option 5 with 15, x8000", Test23, 3, false);
-    tester.registerCompTest("Test Option 5 with 1, xABCD", Test24, 3, false);
-    tester.registerCompTest("Test Option 5 with 1, xFFFF", Test25, 3, false);
-    tester.registerCompTest("Test Option 6 with x0000", Test26, 3, false);
-    tester.registerCompTest("Test Option 6 with x8000", Test27, 3, false);
-    tester.registerCompTest("Test Option 6 with xABCD", Test28, 3, false);
-    tester.registerCompTest("Test Option 6 with xFFFF", Test29, 3, false);
-    tester.registerCompTest("Test Option 7", Test30, 4, false);
+    tester.registerCompTest("Test Empty String", Test01, 4, false);
+    tester.registerCompTest("Test String length 1", Test02, 4, false);
+    tester.registerCompTest("Test Short Palindrome Even Length", Test03, 7, false);
+    tester.registerCompTest("Test Short Palindrome Odd Length", Test04, 7, false);
+    tester.registerCompTest("Test Short Non-palindrome Even Length", Test05, 7, false);
+    tester.registerCompTest("Test Short Non-palindrome Odd Length", Test06, 7, false);
+    tester.registerCompTest("Test Non-palindrome with spaces", Test07, 7, false);
+    tester.registerCompTest("Test Palindrome with spaces", Test08, 7, false);
+    tester.registerCompTest("Test Very Long Non-palindrome", Test09, 10, false);
+    tester.registerCompTest("Test Very Long Palindrome", Test10, 10, false);
 }
 
