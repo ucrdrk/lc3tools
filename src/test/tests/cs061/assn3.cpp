@@ -79,8 +79,8 @@ void Test05(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_point
 void setup(Tester &tester) {
     tester.registerCompTest("TestAllOnes", Test01, 20, false);
     tester.registerCompTest("TestAnything", Test02, 20, false);
-    tester.registerCompTest("Test a One in MSB", Test03, 20, false);
-    tester.registerCompTest("Test a number that is a power of 2 greater than 2", Test04, 20, false);
-    tester.registerCompTest("Test all Zeroes", Test05, 20, false);
+    tester.registerCompTest("Test_a_One_in_MSB", Test03, 20, false);
+    tester.registerCompTest("Test_a_number_that_is_a_power_of_2_greater_than_2", Test04, 20, false);
+    tester.registerCompTest("Test_all_Zeroes", Test05, 20, false);
 }
 
