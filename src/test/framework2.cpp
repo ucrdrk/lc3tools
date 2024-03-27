@@ -235,7 +235,7 @@ std::pair<double, double> Tester::testAll(void)
 
 std::pair<double, double> Tester::testSingle(std::string const & test_name)
 {
-    for(TestCase const & test : tests) {
+    for(CompTestCase const & test : comp_tests) {
         if(test.name == test_name) {
             return testSingle(test);
         }

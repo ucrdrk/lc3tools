@@ -83,8 +83,8 @@ void TestSubtractZero(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double t
 void setup(Tester &tester) {
     tester.registerCompTest("TestNegative", TestNegative, 25, false);
     tester.registerCompTest("TestPositive", TestPositive, 25, false);
-    tester.registerCompTest("TestZero", TestZeroResult, 15, false);
-    tester.registerCompTest("TestZero", TestZeroInput, 15, false);
-    tester.registerCompTest("TestZero", TestSubtractZero, 20, false);
+    tester.registerCompTest("TestZero1", TestZeroResult, 15, false);
+    tester.registerCompTest("TestZero2", TestZeroInput, 15, false);
+    tester.registerCompTest("TestZero3", TestSubtractZero, 20, false);
 }
 
