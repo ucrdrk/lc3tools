@@ -81,13 +81,13 @@ void Test08(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_point
 }
 
 void setup(Tester &tester) {
-    tester.registerCompTest("Test +ve Number without Sign", Test01, 15, false);
-    tester.registerCompTest("Test 5-digit +ve Number with Sign", Test02, 15, false);
-    tester.registerCompTest("Test -ve Number", Test03, 15, false);
-    tester.registerCompTest("Test 5-digit -ve Number", Test04, 10, false);
-    tester.registerCompTest("Test invalid initial character, +ve number w/sign", Test05, 15, false);
-    tester.registerCompTest("Test invalid internal character, -ve number", Test06, 15, false);
-    tester.registerCompTest("Test Double Sign, +ve number w/sign", Test07, 10, false);
-    tester.registerCompTest("Test no entry", Test08, 5, false);
+    tester.registerCompTest("Test01", Test01, 15, false);
+    tester.registerCompTest("Test02", Test02, 15, false);
+    tester.registerCompTest("Test03", Test03, 15, false);
+    tester.registerCompTest("Test04", Test04, 10, false);
+    tester.registerCompTest("Test05", Test05, 15, false);
+    tester.registerCompTest("Test06", Test06, 15, false);
+    tester.registerCompTest("Test07", Test07, 10, false);
+    tester.registerCompTest("Test08", Test08, 5, false);
 }
 

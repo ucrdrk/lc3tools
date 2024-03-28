@@ -103,15 +103,15 @@ void Test10(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_point
 }
 
 void setup(Tester &tester) {
-    tester.registerCompTest("Test Empty String", Test01, 4, false);
-    tester.registerCompTest("Test String length 1", Test02, 4, false);
-    tester.registerCompTest("Test Short Palindrome Even Length", Test03, 7, false);
-    tester.registerCompTest("Test Short Palindrome Odd Length", Test04, 7, false);
-    tester.registerCompTest("Test Short Non-palindrome Even Length", Test05, 7, false);
-    tester.registerCompTest("Test Short Non-palindrome Odd Length", Test06, 7, false);
-    tester.registerCompTest("Test Non-palindrome with spaces", Test07, 7, false);
-    tester.registerCompTest("Test Palindrome with spaces", Test08, 7, false);
-    tester.registerCompTest("Test Very Long Non-palindrome", Test09, 10, false);
-    tester.registerCompTest("Test Very Long Palindrome", Test10, 10, false);
+    tester.registerCompTest("Test01", Test01, 4, false);
+    tester.registerCompTest("Test02", Test02, 4, false);
+    tester.registerCompTest("Test03", Test03, 7, false);
+    tester.registerCompTest("Test04", Test04, 7, false);
+    tester.registerCompTest("Test05", Test05, 7, false);
+    tester.registerCompTest("Test06", Test06, 7, false);
+    tester.registerCompTest("Test07", Test07, 7, false);
+    tester.registerCompTest("Test08", Test08, 7, false);
+    tester.registerCompTest("Test09", Test09, 10, false);
+    tester.registerCompTest("Test10", Test10, 10, false);
 }
 
