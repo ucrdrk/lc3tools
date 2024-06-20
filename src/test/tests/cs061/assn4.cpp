@@ -22,6 +22,7 @@ void shutdown() {
 
 static const std::string error_prefix = "Failed: Program I/O differs from expected I/O: \\n\\\"";
 static const std::string error_conjunction = "\\\", should be: \\n\\\"";
+static const std::string error_instruction_limit = "Failed: Program exceeded instruction limit!";
 
 std::string BuildErrorLabel(const std::string &expected, const std::string &got) {
     return  error_prefix + got + error_conjunction + expected;
@@ -45,6 +46,11 @@ void ExecuteTest(lc3::sim &sol_sim, lc3::sim &sim, Tester &tester, double total_
     success &= sol_sim.runUntilHalt();
 
     std::string label = "Failed: Program register output differs from the solution register output."; 
+
+    if (sim.didExceedInstLimit()) {
+        label = error_instruction_limit;
+    }
+
     tester.verify(label, success && sim.readReg(reg) == sol_sim.readReg(reg), total_points);    
 }
 
